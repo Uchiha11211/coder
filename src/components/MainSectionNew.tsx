@@ -5,11 +5,11 @@ import { Send, Bot, User, Settings, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useBranchStore } from '@/store/branchStore';
 
-interface Message {
-  id: string;
-  type: 'user' | 'ai' | 'status';
-  content: string;
-  timestamp: Date;
+// Import the base Message type from store and extend it
+import type { Branch } from '@/store/branchStore';
+type BaseMessage = Branch['chatHistory'][0];
+
+interface Message extends BaseMessage {
   status?: 'analyzing' | 'generating' | 'completed' | 'error';
 }
 
