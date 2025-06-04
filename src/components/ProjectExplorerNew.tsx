@@ -539,7 +539,7 @@ export default function ProjectExplorer({ onFileSelect, currentBranch }: Project
       case 'gif':
       case 'svg':
       case 'webp':
-        return <Image size={16} className="text-purple-400" />;
+        return <Image size={16} className="text-purple-400" aria-label="Image file" />;
       case 'mp3':
       case 'wav':
       case 'ogg':

@@ -28,8 +28,32 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
   const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fallback to imgBB
+  const uploadToImgBB = useCallback(async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      // Using a demo API key - in production, use your own
+      const response = await fetch('https://api.imgbb.com/1/upload?key=demo', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.data.url;
+      }
+    } catch (error) {
+      console.error('ImgBB upload failed:', error);
+    }
+
+    // Final fallback to local URL
+    return URL.createObjectURL(file);
+  }, []);
+
   // Upload to catbox.moe (free temporary hosting)
-  const uploadToCatbox = async (file: File): Promise<string> => {
+  const uploadToCatbox = useCallback(async (file: File): Promise<string> => {
     const formData = new FormData();
     formData.append('reqtype', 'fileupload');
     formData.append('fileToUpload', file);
@@ -51,34 +75,10 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
       // Fallback to other services or local URL
       return await uploadToImgBB(file);
     }
-  };
-
-  // Fallback to imgBB
-  const uploadToImgBB = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    try {
-      // Using a demo API key - in production, use your own
-      const response = await fetch('https://api.imgbb.com/1/upload?key=demo', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.data.url;
-      }
-    } catch (error) {
-      console.error('ImgBB upload failed:', error);
-    }
-
-    // Final fallback to local URL
-    return URL.createObjectURL(file);
-  };
+  }, [uploadToImgBB]);
 
   // Analyze image using AI
-  const analyzeImage = async (imageUrl: string): Promise<string> => {
+  const analyzeImage = useCallback(async (imageUrl: string): Promise<string> => {
     try {
       const response = await fetch(process.env.NEXT_PUBLIC_POLLINATIONS_API_URL || 'https://text.pollinations.ai/openai', {
         method: 'POST',
@@ -132,38 +132,7 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
       console.error('Image analysis failed:', error);
       return `Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
-  };
-
-  const handleFileSelect = useCallback(async (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-
-    const newImages: UploadedImage[] = [];
-    const filesToProcess = Array.from(files).slice(0, maxImages - images.length);
-
-    for (const file of filesToProcess) {
-      if (!file.type.startsWith('image/')) continue;
-
-      const imageId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const newImage: UploadedImage = {
-        id: imageId,
-        file,
-        localUrl: URL.createObjectURL(file),
-        isAnalyzing: false,
-        isUploading: false,
-        name: file.name,
-        size: file.size
-      };
-
-      newImages.push(newImage);
-    }
-
-    setImages(prev => [...prev, ...newImages]);
-
-    // Process each image
-    for (const image of newImages) {
-      processImage(image.id);
-    }
-  }, [images.length, maxImages, processImage]);
+  }, []);
 
   const processImage = useCallback(async (imageId: string) => {
     setImages(prev => prev.map(img => 
@@ -203,6 +172,37 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
       ));
     }
   }, [images, uploadToCatbox, analyzeImage]);
+
+  const handleFileSelect = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    const newImages: UploadedImage[] = [];
+    const filesToProcess = Array.from(files).slice(0, maxImages - images.length);
+
+    for (const file of filesToProcess) {
+      if (!file.type.startsWith('image/')) continue;
+
+      const imageId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newImage: UploadedImage = {
+        id: imageId,
+        file,
+        localUrl: URL.createObjectURL(file),
+        isAnalyzing: false,
+        isUploading: false,
+        name: file.name,
+        size: file.size
+      };
+
+      newImages.push(newImage);
+    }
+
+    setImages(prev => [...prev, ...newImages]);
+
+    // Process each image
+    for (const image of newImages) {
+      processImage(image.id);
+    }
+  }, [images.length, maxImages, processImage]);
 
   const removeImage = (imageId: string) => {
     const image = images.find(img => img.id === imageId);

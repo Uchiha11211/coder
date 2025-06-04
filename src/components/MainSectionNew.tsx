@@ -248,9 +248,9 @@ Could you provide more specific details about what you're looking for? The more 
                       )}
                     </div>
                   ) : (
-                    <ReactMarkdown 
-                      className="prose prose-sm prose-invert max-w-none"
-                      components={{
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <ReactMarkdown 
+                        components={{
                         code: ({ children, className }) => (
                           <code className={`${className} bg-gray-800 px-2 py-1 rounded text-blue-300`}>
                             {children}
@@ -276,10 +276,11 @@ Could you provide more specific details about what you're looking for? The more 
                         li: ({ children }) => (
                           <li className="text-gray-200">{children}</li>
                         )
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
                   )}
                   <div className="mt-2 text-xs text-gray-500">
                     {message.timestamp.toLocaleTimeString()}
