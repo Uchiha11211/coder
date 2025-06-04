@@ -110,11 +110,8 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
     };
     
     return findInNodes(currentBranch.fileTree || [], path);
-  }, [currentBranch]);</mental_old_code>
+  }, [currentBranch]);
 
-<mentat_replace_edit filepath="src/components/FileEditor.tsx">
-<mentat_old_code>import { useState, useRef, useEffect } from 'react';</mentat_old_code>
-<mentat_new_code>import { useState, useRef, useEffect, useCallback } from 'react';
 
   // Open file in new tab
   useEffect(() => {
