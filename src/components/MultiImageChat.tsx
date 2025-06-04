@@ -163,7 +163,7 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
     for (const image of newImages) {
       processImage(image.id);
     }
-  }, [images.length, maxImages]);
+  }, [images.length, maxImages, processImage]);
 
   const processImage = useCallback(async (imageId: string) => {
     setImages(prev => prev.map(img => 
@@ -202,7 +202,7 @@ export default function MultiImageChat({ onImagesAnalyzed, maxImages = 10 }: Mul
           : img
       ));
     }
-  }, [images]);
+  }, [images, uploadToCatbox, analyzeImage]);
 
   const removeImage = (imageId: string) => {
     const image = images.find(img => img.id === imageId);

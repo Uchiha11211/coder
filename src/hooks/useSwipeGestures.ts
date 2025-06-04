@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, RefObject } from 'react';
+import { useRef, useEffect, RefObject, useCallback } from 'react';
 
 interface SwipeConfig {
   onSwipeLeft?: () => void;
@@ -33,7 +33,7 @@ export function useSwipeGestures<T extends HTMLElement>(
     preventDefaultTouchmoveEvent = false
   } = config;
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     const touch = e.touches[0];
     touchStart.current = {
       x: touch.clientX,
@@ -41,15 +41,15 @@ export function useSwipeGestures<T extends HTMLElement>(
       time: Date.now()
     };
     touchEnd.current = null;
-  };
+  }, []);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (preventDefaultTouchmoveEvent) {
       e.preventDefault();
     }
-  };
+  }, [preventDefaultTouchmoveEvent]);
 
-  const handleTouchEnd = (e: TouchEvent) => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     if (!touchStart.current) return;
 
     const touch = e.changedTouches[0];
@@ -93,7 +93,7 @@ export function useSwipeGestures<T extends HTMLElement>(
     // Reset
     touchStart.current = null;
     touchEnd.current = null;
-  };
+  }, [threshold, onSwipeRight, onSwipeLeft, onSwipeDown, onSwipeUp]);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -140,7 +140,7 @@ export function useAdvancedGestures<T extends HTMLElement>(config: {
     return Math.atan2(dy, dx) * 180 / Math.PI;
   };
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     touchesRef.current = Array.from(e.touches);
 
     // Long press detection for single touch
@@ -166,9 +166,9 @@ export function useAdvancedGestures<T extends HTMLElement>(config: {
       initialDistanceRef.current = getDistance(touch1, touch2);
       initialAngleRef.current = getAngle(touch1, touch2);
     }
-  };
+  }, [onLongPress, longPressDelay]);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     touchesRef.current = Array.from(e.touches);
 
     // Cancel long press on move
@@ -194,9 +194,9 @@ export function useAdvancedGestures<T extends HTMLElement>(config: {
         onRotate(angleDiff);
       }
     }
-  };
+  }, [onPinch, onRotate]);
 
-  const handleTouchEnd = (e: TouchEvent) => {
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
     touchesRef.current = Array.from(e.touches);
 
     // Cancel long press
@@ -210,7 +210,7 @@ export function useAdvancedGestures<T extends HTMLElement>(config: {
       initialDistanceRef.current = null;
       initialAngleRef.current = null;
     }
-  };
+  }, []);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -244,15 +244,15 @@ export function usePullToRefresh<T extends HTMLElement>(
   const currentYRef = useRef<number | null>(null);
   const isRefreshingRef = useRef(false);
 
-  const handleTouchStart = (e: TouchEvent) => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     if (isRefreshingRef.current) return;
     
     const touch = e.touches[0];
     startYRef.current = touch.clientY;
     currentYRef.current = touch.clientY;
-  };
+  }, []);
 
-  const handleTouchMove = (e: TouchEvent) => {
+  const handleTouchMove = useCallback((e: TouchEvent) => {
     if (isRefreshingRef.current || !startYRef.current) return;
 
     const touch = e.touches[0];
@@ -273,9 +273,9 @@ export function usePullToRefresh<T extends HTMLElement>(
         element.style.filter = 'none';
       }
     }
-  };
+  }, [threshold]);
 
-  const handleTouchEnd = async () => {
+  const handleTouchEnd = useCallback(async () => {
     if (isRefreshingRef.current || !startYRef.current || !currentYRef.current) return;
 
     const deltaY = currentYRef.current - startYRef.current;
@@ -304,7 +304,7 @@ export function usePullToRefresh<T extends HTMLElement>(
 
     startYRef.current = null;
     currentYRef.current = null;
-  };
+  }, [threshold, onRefresh]);
 
   useEffect(() => {
     const element = elementRef.current;

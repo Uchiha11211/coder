@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { X, Image as ImageIcon, Loader, Download } from 'lucide-react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ImageProcessorProps {
@@ -281,9 +282,11 @@ export default function ImageProcessor({ onImageAnalyzed, onClose, isOpen }: Ima
                   <div>
                     <h4 className="font-medium mb-3">Preview</h4>
                     <div className="bg-gray-900 rounded-lg p-4">
-                      <img
+                      <Image
                         src={uploadedImage.url}
                         alt={`Preview of ${uploadedImage.name}`}
+                        width={256}
+                        height={256}
                         className="w-full h-auto max-h-64 object-contain rounded"
                       />
                     </div>

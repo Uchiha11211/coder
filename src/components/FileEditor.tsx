@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Save, 
   X, 
@@ -81,7 +81,7 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
   };
 
   // Find file content in current branch
-  const findFileContent = (path: string): string => {
+  const findFileContent = useCallback((path: string): string => {
     if (!currentBranch) return '';
     
     interface FileNode {
@@ -110,7 +110,11 @@ export default function FileEditor({ filePath, onClose, onSave }: FileEditorProp
     };
     
     return findInNodes(currentBranch.fileTree || [], path);
-  };
+  }, [currentBranch]);</mental_old_code>
+
+<mentat_replace_edit filepath="src/components/FileEditor.tsx">
+<mentat_old_code>import { useState, useRef, useEffect } from 'react';</mentat_old_code>
+<mentat_new_code>import { useState, useRef, useEffect, useCallback } from 'react';
 
   // Open file in new tab
   useEffect(() => {

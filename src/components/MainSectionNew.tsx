@@ -30,7 +30,7 @@ export default function MainSection() {
       isInitialLoadRef.current = true;
       
       if (currentBranch.chatHistory.length > 0) {
-        setMessages(currentBranch.chatHistory);
+        setMessages(currentBranch.chatHistory as Message[]);
       } else {
         const welcomeMessage: Message = {
           id: 'welcome',
@@ -57,7 +57,7 @@ What would you like to build today?`,
         isInitialLoadRef.current = false;
       }, 100);
     }
-  }, [currentBranch?.id]);
+  }, [currentBranch?.id, currentBranch]);
 
   // Save messages to store (with proper debouncing to prevent infinite loops)
   const saveMessagesToStore = useCallback((messagesToSave: Message[]) => {
